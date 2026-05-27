@@ -2,7 +2,7 @@
 
 Cup2 is a file upload management framework for the [Cappuccino Web Framework](http://www.cappuccino-project.org). 
 
-It was forked from the excellent Cup framework (aparajita/Cup) with two primary goals:
+It was forked from the Cup framework (Cup1) with two primary goals:
 1. **Eliminate the jQuery dependency:** Cup2 removes the requirement for jQuery and the jQuery File Upload library, instead utilizing modern native browser APIs (`XMLHttpRequest` Level 2, `FormData`, and HTML5 Drag-and-Drop).
 2. **Expose server responses:** It introduces the delegate method `- (void)cup:(Cup)cup uploadDidSucceedForFile:(CupFile)file response:(id)response`, allowing developers to retrieve and process server response data directly upon a successful upload.
 
@@ -64,6 +64,20 @@ var uploader = [[Cup alloc] initWithURL:@"/upload-endpoint"];
 2. Connect the `Cup` object to an outlet in your custom controller.
 3. Add an `NSArrayController` and connect the `queueController` outlet of the `Cup` object to it.
 4. Bind your UI controls (such as a table view displaying the file queue or a `CPProgressIndicator` for the upload status) directly to the array controller or to the progress properties of the `Cup` object.
+
+---
+
+## Server-Side Integration
+
+When handling the file upload on your server, note that files are transmitted via standard `multipart/form-data` payloads. 
+
+The framework appends the file payload using the specific form field name **`files[]`**:
+
+```javascript
+formData.append("files[]", nativeFile, name);
+```
+
+Your server-side application should be configured to parse and process files under the `files[]` field key.
 
 ---
 
