@@ -1,23 +1,29 @@
 # Cup2 (Cappuccino Uploader 2)
 
-Cup2 is a file upload management framework for the [Cappuccino Web Framework](http://www.cappuccino-project.org). Built entirely on modern native browser APIs (`XMLHttpRequest` Level 2, `FormData`, HTML5 Drag-and-Drop), it operates without external dependencies like jQuery or the jQuery File Upload library like its predecessor Cup.
+Cup2 is a file upload management framework for the [Cappuccino Web Framework](http://www.cappuccino-project.org). 
 
-By integrating directly with core Cappuccino concepts (KVO, Bindings, Array Controllers), the framework allows you to build file upload interfaces with minimal code, including direct configuration in Xcode/Interface Builder.
+It was forked from the excellent Cup framework (aparajita/Cup) with two primary goals:
+1. **Eliminate the jQuery dependency:** Cup2 removes the requirement for jQuery and the jQuery File Upload library, instead utilizing modern native browser APIs (`XMLHttpRequest` Level 2, `FormData`, and HTML5 Drag-and-Drop).
+2. **Expose server responses:** It introduces the delegate method `- (void)cup:(Cup)cup uploadDidSucceedForFile:(CupFile)file response:(id)response`, allowing developers to retrieve and process server response data directly upon a successful upload.
+
+To maintain source compatibility and ease the migration process, class names, file names, and import structures have not been renamed and continue to use the original `Cup` prefix.
 
 ---
 
 ## Features
 
-- **No External Dependencies:** Written in pure Objective-J, utilizing standard Web APIs.
+- **No External Dependencies:** Written in native Objective-J, utilizing standard Web APIs rather than third-party libraries.
 - **Flexible Queue Management:** Supports sequential or concurrent uploads (with configurable limits on active concurrent connections).
 - **Chunked Uploads:** Supports slicing large files into smaller chunks using the `Content-Range` header.
 - **Drag-and-Drop & Paste:** Configure any `CPView` (or the main browser window) as a drop zone or clipboard paste listener.
 - **KVO & Bindings Support:** Integration with table views (`CPTableView`) or progress bars using a standard `CPArrayController`.
-- **Comprehensive Delegate Protocol:** Detailed callback support for validation filters, file size limits, progress tracking, and state changes for chunks and files.
+- **Comprehensive Delegate Protocol:** Detailed callback support for validation filters, file size limits, progress tracking, and state changes—including access to the raw server response.
 
 ---
 
-## Installation
+## Installation & Compatibility
+
+Because the class and file names remain unchanged for backward compatibility, installation follows the same structure as the original framework:
 
 1. Copy the `Cup` framework folder into your project directory (e.g., under `Frameworks/`).
 2. Import the framework in your application code or build configuration:
@@ -52,7 +58,7 @@ var uploader = [[Cup alloc] initWithURL:@"/upload-endpoint"];
 
 ### Using Interface Builder (Xcode)
 
-Because of its design, `Cup` can be configured directly inside Interface Builder:
+`Cup` can be configured directly inside Interface Builder:
 
 1. Add an `NSObject` to your `.xib` file and set its class to `Cup`.
 2. Connect the `Cup` object to an outlet in your custom controller.
@@ -82,7 +88,9 @@ A helper value transformer designed to convert raw byte sizes into human-readabl
 
 ## Delegate Protocol (`CupDelegate`)
 
-Implement these methods in your controller to monitor and react to events in the upload lifecycle:
+Implement these methods in your controller to monitor and react to events in the upload lifecycle. 
+
+Note the added delegate method that provides access to the server response object:
 
 ```objective-j
 // Determine if a file should be accepted into the queue before it is added
@@ -97,7 +105,7 @@ Implement these methods in your controller to monitor and react to events in the
     // progress contains: uploadedBytes, total, bitrate
 }
 
-// Receive a notification when a file upload succeeds, along with the server response
+// NEW IN CUP2: Receive notification when an upload succeeds, including the server response
 - (void)cup:(Cup)cup uploadDidSucceedForFile:(CupFile)file response:(id)response
 {
     CPLog.info(@"Upload succeeded for: " + [file name]);
@@ -108,11 +116,11 @@ Implement these methods in your controller to monitor and react to events in the
     }
 }
 
-// Receive a notification when a file upload succeeds
+// Legacy delegate method for basic success notifications
 - (void)cup:(Cup)cup uploadDidSucceedForFile:(CupFile)file
 {
     CPLog.info(@"Upload succeeded for: " + [file name]);
 }
 ```
 
-For a full list of available delegate methods, refer to `CupDelegate.j`.
+For a complete list of available delegate methods, please refer to `CupDelegate.j`.
