@@ -2,7 +2,7 @@
 
 Cup2 is a file upload management framework for the [Cappuccino Web Framework](http://www.cappuccino-project.org). 
 
-It was forked from the Cup framework (Cup1) with two primary goals:
+It was forked from the Cup framework (aparajita/Cup) with two primary goals:
 1. **Eliminate the jQuery dependency:** Cup2 removes the requirement for jQuery and the jQuery File Upload library, instead utilizing modern native browser APIs (`XMLHttpRequest` Level 2, `FormData`, and HTML5 Drag-and-Drop).
 2. **Expose server responses:** It introduces the delegate method `- (void)cup:(Cup)cup uploadDidSucceedForFile:(CupFile)file response:(id)response`, allowing developers to retrieve and process server response data directly upon a successful upload.
 
