@@ -97,6 +97,17 @@ Implement these methods in your controller to monitor and react to events in the
     // progress contains: uploadedBytes, total, bitrate
 }
 
+// Receive a notification when a file upload succeeds, along with the server response
+- (void)cup:(Cup)cup uploadDidSucceedForFile:(CupFile)file response:(id)response
+{
+    CPLog.info(@"Upload succeeded for: " + [file name]);
+    
+    if (response && response.status === @"success")
+    {
+        CPLog.info(@"Server file ID: " + response.file_id);
+    }
+}
+
 // Receive a notification when a file upload succeeds
 - (void)cup:(Cup)cup uploadDidSucceedForFile:(CupFile)file
 {
