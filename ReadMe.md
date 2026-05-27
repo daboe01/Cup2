@@ -1,6 +1,6 @@
-# Cup (Cappuccino Uploader)
+# Cup2 (Cappuccino Uploader 2)
 
-Cup is a file upload management framework for the [Cappuccino Web Framework](http://www.cappuccino-project.org). Built entirely on modern native browser APIs (`XMLHttpRequest` Level 2, `FormData`, HTML5 Drag-and-Drop), it operates without external dependencies like jQuery or the jQuery File Upload library.
+Cup2 is a file upload management framework for the [Cappuccino Web Framework](http://www.cappuccino-project.org). Built entirely on modern native browser APIs (`XMLHttpRequest` Level 2, `FormData`, HTML5 Drag-and-Drop), it operates without external dependencies like jQuery or the jQuery File Upload library like its predecessor Cup.
 
 By integrating directly with core Cappuccino concepts (KVO, Bindings, Array Controllers), the framework allows you to build file upload interfaces with minimal code, including direct configuration in Xcode/Interface Builder.
 
