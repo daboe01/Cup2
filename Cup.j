@@ -55,7 +55,8 @@ var baseWidgetId = @"Cup_input",
     delegateChunkComplete = 1 << 20,
     delegateStartQueue = 1 << 21,
     delegateClearQueue = 1 << 22,
-    delegateStopQueue = 1 << 23;
+    delegateStopQueue = 1 << 23,
+    delegateSucceedWithResponse = 1 << 24;
 
 var CupDefaultProgressInterval = 100;
 
@@ -305,6 +306,9 @@ var CupDefaultProgressInterval = 100;
 
     if ([delegate respondsToSelector:@selector(cup:wasDraggedOverWithEvent:)])
         delegateImplementsFlags |= delegateDrag;
+
+    if ([delegate respondsToSelector:@selector(cup:uploadDidSucceedForFile:response:)])
+        delegateImplementsFlags |= delegateSucceedWithResponse;
 }
 
 /*!
@@ -711,6 +715,16 @@ var CupDefaultProgressInterval = 100;
 
     if (delegateImplementsFlags & delegateProgress)
         [delegate cup:self uploadsDidProgress:overallProgress];
+}
+
+- (void)uploadDidSucceedForFile:(CupFile)file withResponse:(CPString)responseText
+{
+    [file setStatus:CupFileStatusComplete];
+
+    if (delegateImplementsFlags & delegateSucceedWithResponse)
+        [delegate cup:self uploadDidSucceedForFile:file response:responseText];
+    else if (delegateImplementsFlags & delegateSucceed)
+        [delegate cup:self uploadDidSucceedForFile:file];
 }
 
 - (void)uploadDidSucceedForFile:(CupFile)file
@@ -1323,7 +1337,7 @@ var CupDefaultProgressInterval = 100;
     };
     [cup setCurrentData:mockData];
 
-    [cup uploadDidSucceedForFile:self];
+    [cup uploadDidSucceedForFile:self withResponse:responseText];
     [cup uploadDidCompleteForFile:self];
 }
 

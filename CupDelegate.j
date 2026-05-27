@@ -122,6 +122,15 @@
 }
 
 /*!
+    A file was successfully uploaded. The response parameter contains the data returned 
+    by the server. If the server returned valid JSON, this parameter will be a parsed JavaScript 
+    object/dictionary; otherwise, it will be the raw response string.
+*/
+- (void)cup:(Cup)cup uploadDidSucceedForFile:(CupFile)file response:(id)response
+{
+}
+
+/*!
     A file was successfully uploaded.
 */
 - (void)cup:(Cup)cup uploadDidSucceedForFile:(CupFile)file
