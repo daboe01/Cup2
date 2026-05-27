@@ -13,22 +13,6 @@
 
 /*!
     This class is the protocol for CupDelegate objects.
-    The methods in this class for the most part correspond to jQuery File Upload
-    callbacks (https://github.com/blueimp/jQuery File Upload/wiki/Options#callback-options).
-
-    This class can either be subclassed, or can be used as a template for your
-    own delegates. If you subclass, be sure to provide the appropriate
-    functionality for those methods that expect something to be done.
-    If you are only using this as a template, you only need to implement
-    the methods that you intend to add some functionality to.
-
-    All of the methods receive as their first parameter the Cup
-    object of which the receiver is a delegate. The methods that are related
-    to a file also receive the CupFile object that is being operated on.
-
-    If the delegate wants access to the underlying jQuery event or
-    jQuery File Upload data object that is current, it can use the methods
-    [cup currentEvent] or [cup currentData].
 */
 @implementation CupDelegate : CPObject
 
@@ -226,7 +210,7 @@
 /*!
     Called periodically while files are being dragged over the Cup drop target.
 */
-- (void)cup:(Cup)cup wasDraggedOverWithEvent:(jQueryEvent)event
+- (void)cup:(Cup)cup wasDraggedOverWithEvent:(id)event
 {
 }
 

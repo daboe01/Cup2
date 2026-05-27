@@ -18,9 +18,6 @@
 @import <AppKit/CPPlatformWindow.j>
 @import <AppKit/CPTableView.j>
 
-@global jQuery
-@typedef jQueryEvent
-
 CupFileStatusPending   = 0;
 CupFileStatusUploading = 1;
 CupFileStatusComplete  = 2;
@@ -65,153 +62,11 @@ var CupDefaultProgressInterval = 100;
 /*!
     @class Cup
 
-    A wrapper for jQuery File Upload. The main configuration options
-    are available as accessor methods in this class. If other options
-    need to be set, use the options and setOptions: methods.
-
-    The full set of callbacks supported by jQuery File Upload are provided as delegate methods.
-    See the CupDelegate class for more info.
-
-    This class exposes many KVO compliant properties, outlets and actions that are useful when
-    creating interfaces that use this class. If you plan to create an interface using Cup
-    in Xcode, you will get the most out of it by doing the following:
-
-    - In the controller class that will use Cup, create a Cup outlet.
-    - In Xcode, edit the xib that will contain the Cup interface.
-    - Add an NSObject to the xib and set its class to Cup.
-    - Connect the Cup instance to your controller's Cup outlet.
-    - Add an NSArrayController to the xib.
-    - Connect the queueController outlet of the Cup object to the array controller.
-
-    Once you have done this, you can bind directly to properties in the Cup object
-    and to the arrangedObjects and selection of the array controller.
-
-    ----------
-    Properties
-    ----------
-    Where noted, the properties in this class mirror the options in jQuery File Upload, which are
-    documented here: https://github.com/blueimp/jQuery File Upload/wiki/Options. Except where
-    noted, the properties are read-write, and where the type is suitable, can be used with bindings.
-
-    Most of the read-write properties can be set in Xcode:
-
-    - Select the Cup object.
-    - Select the Identity Inspector.
-    - In the User Defined Runtime Attributes pane, click + to add an attribute.
-    - Set the Key Path to the property's name.
-    - Set the Type to the property's type or the parameter type its setter takes.
-    - Set the value to whatever you want.
-
-    For example, you can set the URL of the upload server by adding this User Defined
-    Runtime Attribute:
-
-    Key Path: URL
-    Type:     String
-    Value:    http://myserver.com/upload
-
-    Name                    Description
-    ---------------------   -----------------------------------------------------------------------------
-    uploading               A BOOL set to YES during uploading. (read-only)
-
-    indeterminate           A BOOL that indicates whether the total size of the upload queue is known.
-                            This affects what is reported in the progress callbacks. This will be YES
-                            if the browser does not support the File API. (read-only)
-
-    progress                A dictionary which contains info on the overall progress of the upload.
-                            The dictionary contains the following items:
-
-                                uploadedBytes   Number of bytes uploaded so far.
-                                total           Total number of bytes to be uploaded. If indeterminate
-                                                is YES, this is zero.
-                                percentComplete Integer percentage of the total (0-100) uploaded so far.
-                                                If indeterminate is YES, this is zero.
-                                bitrate         The overall bitrate of the upload so far.
-
-                            As usual, you can bind to items within the dictionary.
-                            (read-only)
-
-    URL                     A string representing the URL to which files will be uploaded.
-                            jQuery File Upload option: url.
-
-    sequential              A BOOL indicating whether multiple uploads will be performed sequentially
-                            or concurrently. NO by default. jQuery File Upload option: sequentialUploads.
-
-    maxChunkSize            If non-zero, uploads will be chunked. This is definitely preferable
-                            if you plan on supporting large files. jQuery File Upload option: maxChunkSize.
-
-    maxConcurrentUploads    An int which limits the number of concurrent uploads when sequential is NO.
-                            jQuery File Upload option: limitConcurrentUploads.
-
-    progressInterval        The minimum time interval in milliseconds to calculate and trigger progress events.
-                            jQuery File Upload option: progressInterval.
-
-    filenameFilter          A string regular expression suitable for use with the Javascript RegExp constructor.
-                            When adding files to the queue, filenames that do not match regex are rejected.
-                            Setting this property updates the filenameFilterRegex property.
-
-    filenameFilterRegex     A Javascript regular expression. When adding files, filenames that do not match
-                            are rejected. Setting this property updates the filenameFilter property.
-
-    allowedExtensions       This write-only property should be a space-delimited string (e.g. "jpg png gif")
-                            with one or more filename extensions (with or without dots). Setting this property
-                            constructs a RegExp which allows filenames that end with the given extensions and
-                            sets the filenameFilter and filenameFilterRegex properties accordingly.
-
-    maxFileSize             An int representing the maximum size of a file that can be added to the queue.
-                            Only supported on browsers that support the File API.
-
-    autoUpload              A BOOL that indicates whether files added to the queue should immediately
-                            start uploading. Defaults to NO.
-
-    removeCompletedFiles    A BOOL that indicates whether files that have successfully uploaded should be
-                            removed from the queue. Defaults to NO.
-
-    currentEvent            The most recent jQuery event (NOT Cappuccino event) which triggered a method.
-                            Usually this is of no interest, but if for some reason delegates want it,
-                            they can retrieve it through this property. (read-only)
-
-    currentData             When a jQuery File Upload callback is triggered (which eventually calls a Cup
-                            delegate method), in most cases a data object is passed that reflects the current state.
-                            The most relevant fields within that object are copied to the Cappuccino state, so usually
-                            you will have no need for this. Delegates may use this method to retrieve the data passed
-                            from the most recent callback. (read-only)
-
-    queue                   The array of CupFile objects used to represent the queue. In most cases
-                            you should consider this read-only and manipulate the queue through its array controller.
-
-    fileClass               The class of the objects stored in the queue. May be set either with a class or a string
-                            class name, which allows you to set the class in Xcode either through User Defined Runtime
-                            Attributes or bindings. This is useful if you want to add custom properties or methods to
-                            the file objects. Must be CupFile or a subclass thereof.
-
-    -------
-    Outlets
-    -------
-    dropTarget          Files can be added to the queue by dragging and dropping.
-                        By default the entire browser window is the drop target for files.
-                        You can connect this outlet to any view (including Cappuccino windows)
-                        to specify the drop target.
-
-    delegate            Cup communicates with its delegate extensively. You can
-                        connect this outlet to the object that acts as the delegate.
-
-    queueController     The array controller used to manage the upload queue.
-
-    -------
-    Actions
-    -------
-    addFiles:           Presents an open file dialog to add one or more files to the upload queue.
-
-    start:              Starts all files in the upload queue.
-
-    stop:               Stops all files in the upload queue.
-
-    clearQueue:         Clears all files from the upload queue. If an upload is in progress, does nothing.
+    A pure JavaScript and Objective-J alternative to jQuery File Upload.
+    The main configuration options are available as accessor methods.
 */
 @implementation Cup : CPObject
 {
-    // jQuery File Upload options
-    JSObject            fileUploadOptions;
     CPString            URL @accessors;
     CPString            redirectURL @accessors;
     BOOL                sequential @accessors;
@@ -219,7 +74,6 @@ var CupDefaultProgressInterval = 100;
     int                 maxConcurrentUploads @accessors;
     int                 progressInterval @accessors;
     @outlet CPView      dropTarget @accessors(readonly);
-    JSObject            jQueryDropTarget;
 
     CPString            filenameFilter @accessors;
     RegExp              filenameFilterRegex @accessors;
@@ -228,8 +82,8 @@ var CupDefaultProgressInterval = 100;
     BOOL                autoUpload @accessors;
     BOOL                removeCompletedFiles @accessors;
 
-    jQueryEvent         currentEvent @accessors(readonly);
-    JSObject            currentData @accessors(readonly);
+    id                  currentEvent @accessors(readonly);
+    JSObject            currentData @accessors(readwrite);
 
     BOOL                uploading @accessors;
     BOOL                indeterminate @accessors;
@@ -241,10 +95,14 @@ var CupDefaultProgressInterval = 100;
     Class               fileClass @accessors;
 
     CPString            widgetId;
-    JSObject            callbacks;
 
-    CPMutableArray            queue @accessors(readonly);
+    CPMutableArray      queue @accessors(readonly);
     @outlet CPArrayController queueController @accessors(readonly);
+
+    // Native event listeners
+    JSObject            _onDragOverHandler;
+    JSObject            _onDropHandler;
+    JSObject            _onPasteHandler;
 }
 
 + (BOOL)automaticallyNotifiesObserversForKey:(CPString)key
@@ -296,28 +154,34 @@ var CupDefaultProgressInterval = 100;
 #pragma mark Attributes
 
 /*!
-    Returns a copy of the options passed to jQuery File Upload.
-    To set the options from your copy, use setOptions:.
+    Returns a copy of the options.
 */
 - (JSObject)options
 {
-    return cloneOptions([self makeOptions]);
+    return {
+        "url": URL,
+        "sequential": sequential,
+        "maxChunkSize": maxChunkSize,
+        "limitConcurrentUploads": maxConcurrentUploads,
+        "progressInterval": progressInterval
+    };
 }
 
 /*!
-    Sets the options to a copy of the passed in options.
-    Callbacks and dropZone are ignored. Options that are mirrored in this class
-    will be set in a KVO compliant way.
+    Sets options that are mirrored in this class.
 */
 - (void)setOptions:(JSObject)options
 {
-    fileUploadOptions = cloneOptions(options);
-
-    [self setURL:options["url"] || @""];
-    [self setSequential:options["sequential"] || NO];
-    [self setMaxChunkSize:options["maxChunkSize"] || 0];
-    [self setMaxConcurrentUploads:options["limitConcurrentUploads"] || 0];
-    [self setProgressInterval:options["progressInterval"] || CupDefaultProgressInterval];
+    if (options["url"] !== undefined)
+        [self setURL:options["url"]];
+    if (options["sequential"] !== undefined)
+        [self setSequential:options["sequential"]];
+    if (options["maxChunkSize"] !== undefined)
+        [self setMaxChunkSize:options["maxChunkSize"]];
+    if (options["limitConcurrentUploads"] !== undefined)
+        [self setMaxConcurrentUploads:options["limitConcurrentUploads"]];
+    if (options["progressInterval"] !== undefined)
+        [self setProgressInterval:options["progressInterval"]];
 }
 
 /*!
@@ -327,20 +191,33 @@ var CupDefaultProgressInterval = 100;
 */
 - (void)setDropTarget:(CPView)target
 {
+    var oldElement = nil;
+
+    if (dropTarget)
+    {
+        oldElement = (dropTarget === [CPPlatformWindow primaryPlatformWindow]) ? document : dropTarget._DOMElement;
+    }
+
+    if (oldElement)
+    {
+        oldElement.removeEventListener("dragover", _onDragOverHandler);
+        oldElement.removeEventListener("drop", _onDropHandler);
+        oldElement.removeEventListener("paste", _onPasteHandler);
+    }
+
     dropTarget = target;
 
-    if (dropTarget === [CPPlatformWindow primaryPlatformWindow])
-        jQueryDropTarget = jQuery(document);
-    else if (!dropTarget)
-        jQueryDropTarget = nil;
-    else
-        jQueryDropTarget = jQuery(dropTarget._DOMElement);
+    if (!dropTarget)
+        return;
 
-    // If drag and drop is enabled, disable the browser's default drag and drop action
-    jQuery(document)[dropTarget ? "bind" : "unbind"]('drop dragover', function(e)
+    var element = (dropTarget === [CPPlatformWindow primaryPlatformWindow]) ? document : dropTarget._DOMElement;
+
+    if (element)
     {
-        e.preventDefault();
-    });
+        element.addEventListener("dragover", _onDragOverHandler);
+        element.addEventListener("drop", _onDropHandler);
+        element.addEventListener("paste", _onPasteHandler);
+    }
 }
 
 /*!
@@ -485,7 +362,6 @@ var CupDefaultProgressInterval = 100;
 
     if (regex)
     {
-        // RegExp.toString() includes leading/trailing "/" and possible flags, remove those
         filenameFilter = regex.toString().replace(/^\/(.*)\/\w*$/, "$1");
     }
     else
@@ -550,7 +426,9 @@ var CupDefaultProgressInterval = 100;
 */
 - (@action)addFiles:(id)sender
 {
-    jQuery("#" + widgetId)[0].click();
+    var input = document.getElementById(widgetId);
+    if (input)
+        input.click();
 }
 
 /*!
@@ -559,18 +437,19 @@ var CupDefaultProgressInterval = 100;
 */
 - (@action)start:(id)sender
 {
-    [self fileUpload:@"option", [self makeOptions]];
-
     if (!URL)
     {
         CPLog.error("%s: The URL has not been set.", [self className]);
         return;
     }
 
-    [queue makeObjectsPerformSelector:@selector(submit)];
+    [self setUploading:YES];
 
     if (delegateImplementsFlags & delegateStartQueue)
         [delegate cupDidStartQueue:self];
+
+    [self uploadDidStart];
+    [self _processQueue];
 }
 
 /*!
@@ -611,12 +490,12 @@ var CupDefaultProgressInterval = 100;
 */
 - (CupFile)fileWithUID:(CPString)aUID
 {
-    var file = [queue objectAtIndex:[queue indexOfObjectPassingTest:function(file)
+    var index = [queue indexOfObjectPassingTest:function(file)
                     {
                         return [file UID] === aUID;
-                    }]];
+                    }];
 
-    return file;
+    return index >= 0 ? queue[index] : nil;
 }
 
 #pragma mark Overrides
@@ -631,9 +510,87 @@ var CupDefaultProgressInterval = 100;
 {
     if (aKeyPath === @"content")
     {
-        // If a file is added or removed from the content, reset the overall progress to zero.
         [self resetProgress];
     }
+}
+
+#pragma mark Native File Upload Logic (private)
+
+- (void)_processQueue
+{
+    if (!uploading)
+        return;
+
+    var activeCount = 0,
+        count = [queue count];
+
+    for (var i = 0; i < count; i++)
+    {
+        if ([queue[i] uploading])
+            activeCount++;
+    }
+
+    for (var i = 0; i < count; i++)
+    {
+        var file = queue[i];
+
+        if ([file status] === CupFileStatusPending && ![file uploading])
+        {
+            if (sequential && activeCount >= 1)
+                break;
+
+            if (maxConcurrentUploads > 0 && activeCount >= maxConcurrentUploads)
+                break;
+
+            var canSubmit = [self submitFile:file];
+            if (canSubmit)
+            {
+                activeCount++;
+                [file start];
+            }
+        }
+    }
+
+    if (activeCount === 0)
+    {
+        [self setUploading:NO];
+        [self uploadDidStop];
+    }
+}
+
+- (void)_recalculateOverallProgress
+{
+    var totalBytes = 0,
+        uploadedBytes = 0,
+        totalBitrate = 0,
+        activeCount = 0;
+
+    var count = [queue count];
+    for (var i = 0; i < count; i++)
+    {
+        var file = queue[i];
+        totalBytes += [file size];
+        uploadedBytes += [file uploadedBytes];
+        if ([file uploading])
+        {
+            totalBitrate += [file bitrate];
+            activeCount++;
+        }
+    }
+
+    var overallProgress = {
+        uploadedBytes: uploadedBytes,
+        total: totalBytes,
+        bitrate: totalBitrate
+    };
+
+    [self updateProgressWithUploadedBytes:uploadedBytes
+                                   total:totalBytes
+                         percentComplete:(totalBytes > 0 ? (uploadedBytes / totalBytes * 100) : 0)
+                                 bitrate:totalBitrate];
+
+    if (delegateImplementsFlags & delegateProgress)
+        [delegate cup:self uploadsDidProgress:overallProgress];
 }
 
 #pragma mark Delegate (private)
@@ -644,7 +601,7 @@ var CupDefaultProgressInterval = 100;
 {
     var filterFlags = [self validateFile:file],
         canAdd = filterFlags === 0,
-        cupFile = [[fileClass alloc] initWithCup:self file:file data:currentData];
+        cupFile = [[fileClass alloc] initWithCup:self file:file data:nil];
 
     if (canAdd)
     {
@@ -665,7 +622,7 @@ var CupDefaultProgressInterval = 100;
 
         if (autoUpload)
         {
-            [self fileUpload:@"option", [self makeOptions]];
+            [self setUploading:YES];
             [cupFile submit];
         }
     }
@@ -703,9 +660,6 @@ var CupDefaultProgressInterval = 100;
     if (delegateImplementsFlags & delegateSend)
         canSend = [delegate cup:self willSendFile:file];
 
-    if (canSend)
-        [file start];
-
     return canSend;
 }
 
@@ -719,8 +673,6 @@ var CupDefaultProgressInterval = 100;
 
 - (void)chunkDidSucceedForFile:(CupFile)file
 {
-    [file setUploadedBytes:currentData.loaded];
-
     if (delegateImplementsFlags & delegateChunkSucceed)
         [delegate cup:self chunkDidSucceedForFile:file];
 }
@@ -746,14 +698,16 @@ var CupDefaultProgressInterval = 100;
 
     if (delegateImplementsFlags & delegateFileProgress)
         [delegate cup:self uploadForFile:file didProgress:fileProgress];
+
+    [self _recalculateOverallProgress];
 }
 
 - (void)uploadsDidProgress:(JSObject)overallProgress
 {
     [self updateProgressWithUploadedBytes:overallProgress.uploadedBytes
-                                           total:overallProgress.total
-                                 percentComplete:overallProgress.uploadedBytes / overallProgress.total * 100
-                                         bitrate:overallProgress.bitrate];
+                                   total:overallProgress.total
+                         percentComplete:overallProgress.uploadedBytes / overallProgress.total * 100
+                                 bitrate:overallProgress.bitrate];
 
     if (delegateImplementsFlags & delegateProgress)
         [delegate cup:self uploadsDidProgress:overallProgress];
@@ -762,15 +716,6 @@ var CupDefaultProgressInterval = 100;
 - (void)uploadDidSucceedForFile:(CupFile)file
 {
     [file setStatus:CupFileStatusComplete];
-
-    // If a file upload is chunked and had one or more chunks,
-    // the final progress was already set and when we get here
-    // the loaded and bitrate values are zero, so ignore them.
-    if (currentData.loaded)
-        [file setUploadedBytes:currentData.loaded];
-
-    if (currentData.bitrate)
-        [file setBitrate:currentData.bitrate];
 
     if (delegateImplementsFlags & delegateSucceed)
         [delegate cup:self uploadDidSucceedForFile:file];
@@ -790,6 +735,8 @@ var CupDefaultProgressInterval = 100;
 
     if (delegateImplementsFlags & delegateComplete)
         [delegate cup:self uploadDidCompleteForFile:file];
+
+    [self _processQueue];
 }
 
 - (void)uploadWasStoppedForFile:(CupFile)file
@@ -805,7 +752,6 @@ var CupDefaultProgressInterval = 100;
     if (delegateImplementsFlags & delegateStop)
         [delegate cupDidStop:self];
 
-    // Remove complete files
     if (removeCompletedFiles)
     {
         var indexes = [queue indexesOfObjectsPassingTest:function(file)
@@ -836,7 +782,7 @@ var CupDefaultProgressInterval = 100;
         [delegate cup:self didDropFiles:files];
 }
 
-- (void)filesWereDraggedOverWithEvent:(jQueryEvent)anEvent
+- (void)filesWereDraggedOverWithEvent:(id)anEvent
 {
     if (delegateImplementsFlags & delegateDrag)
         [delegate cup:self wasDraggedOverWithEvent:anEvent];
@@ -846,14 +792,68 @@ var CupDefaultProgressInterval = 100;
 
 - (void)_init
 {
+    var self_ = self;
+
+    _onDragOverHandler = function(e)
+    {
+        e.preventDefault();
+        [self_ filesWereDraggedOverWithEvent:e];
+    };
+
+    _onDropHandler = function(e)
+    {
+        e.preventDefault();
+        var files = e.dataTransfer && e.dataTransfer.files;
+        if (files && files.length > 0)
+        {
+            var fileArray = [];
+            for (var i = 0; i < files.length; i++)
+            {
+                fileArray.push(files[i]);
+            }
+
+            [self_ filesWereDropped:fileArray];
+
+            for (var i = 0; i < files.length; i++)
+            {
+                [self_ addFile:files[i]];
+            }
+        }
+    };
+
+    _onPasteHandler = function(e)
+    {
+        var items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        var fileArray = [];
+        for (var i = 0; i < items.length; i++)
+        {
+            if (items[i].kind === 'file')
+            {
+                var file = items[i].getAsFile();
+                if (file)
+                {
+                    fileArray.push(file);
+                }
+            }
+        }
+
+        if (fileArray.length > 0)
+        {
+            [self_ filesWerePasted:fileArray];
+
+            for (var i = 0; i < fileArray.length; i++)
+            {
+                [self_ addFile:fileArray[i]];
+            }
+        }
+    };
+
     [self makeFileInput];
 
-    fileUploadOptions = {};
     delegateImplementsFlags = 0;
-
     fileClass = [CupFile class];
 
-    [self queueController];  // instantiates queue and controller
+    [self queueController];
 
     URL = URL || @"";
     redirectURL = @"";
@@ -863,21 +863,19 @@ var CupDefaultProgressInterval = 100;
     progressInterval = CupDefaultProgressInterval;
     progress = [CPMutableDictionary dictionary];
     dropTarget = [CPPlatformWindow primaryPlatformWindow];
-    jQueryDropTarget = jQuery(document);
-    removeCompletedFiles = NO;
 
+    // Prevent standard browser drag/drop behavior on document level
+    document.addEventListener("dragover", function(e) { e.preventDefault(); }, false);
+    document.addEventListener("drop", function(e) { e.preventDefault(); }, false);
+
+    [self setDropTarget:dropTarget];
     [self resetProgress];
     [self setUploading:NO];
     [self setIndeterminate:!CPFeatureIsCompatible(CPFileAPIFeature)];
-
-    // We have to wait till the next time through the run loop
-    // so the display server has a chance to update the dom.
-    [CPTimer scheduledTimerWithTimeInterval:0 target:self selector:@selector(finishInit) userInfo:nil repeats:NO];
 }
 
 - (void)makeFileInput
 {
-    // Get the first unused id
     var input = nil;
 
     for (var counter = 1; ; ++counter)
@@ -897,194 +895,34 @@ var CupDefaultProgressInterval = 100;
     input.setAttribute("id", widgetId);
     input.setAttribute("name", "files[]");
     input.setAttribute("multiple", "");
+    input.style.position = "absolute";
     input.style.visibility = "hidden";
+    input.style.width = "0";
+    input.style.height = "0";
 
     bodyElement.appendChild(input);
-}
 
-- (void)finishInit
-{
-    jQuery("#" + widgetId).fileupload([self makeOptions]);
-}
+    var self_ = self;
+    input.addEventListener("change", function(e) {
+        var files = e.target.files;
+        if (!files || files.length === 0)
+            return;
 
-- (void)setCallbacks:(JSObject)options
-{
-    if (!callbacks)
-    {
-        callbacks =
+        var fileArray = [];
+        for (var i = 0; i < files.length; i++)
         {
-            add: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-                [self addFile:data.files[0]];
-                [self pumpRunLoop];
-            },
+            fileArray.push(files[i]);
+        }
 
-            submit: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
+        [self_ fileInputDidSelectFiles:fileArray];
 
-                var canSubmit = [self submitFile:[self fileFromJSFile:data.files[0]]];
+        for (var i = 0; i < files.length; i++)
+        {
+            [self_ addFile:files[i]];
+        }
 
-                [self pumpRunLoop];
-                return canSubmit;
-            },
-
-            send: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-
-                var canSend = [self willSendFile:[self fileFromJSFile:data.files[0]]];
-
-                [self pumpRunLoop];
-                return canSend;
-            },
-
-            done: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-                [self uploadDidSucceedForFile:[self fileFromJSFile:data.files[0]]];
-                [self pumpRunLoop];
-            },
-
-            fail: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-                [self uploadDidFailForFile:[self fileFromJSFile:data.files[0]]];
-                [self pumpRunLoop];
-            },
-
-            always: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-                [self uploadDidCompleteForFile:[self fileFromJSFile:data.files[0]]];
-                [self pumpRunLoop];
-            },
-
-            progress: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-
-                var fileProgress = {
-                    uploadedBytes:  data.loaded,
-                    total:          data.total,
-                    bitrate:        data.bitrate
-                };
-
-                [self uploadForFile:[self fileFromJSFile:data.files[0]] didProgress:fileProgress];
-                [self pumpRunLoop];
-            },
-
-            progressall: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-
-                var overallProgress = {
-                    uploadedBytes:  data.loaded,
-                    total:          data.total,
-                    bitrate:        data.bitrate
-                };
-
-                [self uploadsDidProgress:overallProgress];
-                [self pumpRunLoop];
-            },
-
-            start: function(e)
-            {
-                currentEvent = e;
-                currentData = nil;
-                [self uploadDidStart];
-                [self pumpRunLoop];
-            },
-
-            stop: function(e)
-            {
-                currentEvent = e;
-                currentData = nil;
-                [self uploadDidStop];
-                [self pumpRunLoop];
-            },
-
-            change: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-                [self fileInputDidSelectFiles:data.files];
-                [self pumpRunLoop];
-            },
-
-            paste: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-                [self filesWerePasted:data.files];
-                [self pumpRunLoop];
-            },
-
-            drop: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-                [self filesWereDropped:data.files];
-                [self pumpRunLoop];
-            },
-
-            dragover: function(e)
-            {
-                currentEvent = e;
-                currentData = nil;
-                [self filesWereDraggedOverWithEvent:e];
-                [self pumpRunLoop];
-            },
-
-            chunksend: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-
-                var canSend = [self chunkWillSendForFile:[self fileFromJSFile:data.files[0]]];
-
-                [self pumpRunLoop];
-                return canSend;
-            },
-
-            chunkdone: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-                [self chunkDidSucceedForFile:[self fileFromJSFile:data.files[0]]];
-                [self pumpRunLoop];
-            },
-
-            chunkfail: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-                [self chunkDidFailForFile:[self fileFromJSFile:data.files[0]]];
-                [self pumpRunLoop];
-            },
-
-            chunkalways: function(e, data)
-            {
-                currentEvent = e;
-                currentData = data;
-                [self chunkDidCompleteForFile:[self fileFromJSFile:data.files[0]]];
-                [self pumpRunLoop];
-            }
-        };
-    }
-
-    for (var key in callbacks)
-        if (callbacks.hasOwnProperty(key))
-            options[key] = callbacks[key];
+        e.target.value = null;
+    }, false);
 }
 
 - (void)_setFilenameFilter:(CPString)aFilter caseSensitive:(BOOL)caseSensitive
@@ -1106,50 +944,12 @@ var CupDefaultProgressInterval = 100;
 
 - (void)pumpRunLoop
 {
-    // Pump the run loop, jQuery File Upload event handlers are called outside of Cappuccino's run loop
     [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
 }
 
 - (CupFile)fileFromJSFile:(JSFile)file
 {
     return [self fileWithUID:file.CPUID];
-}
-
-- (CupFile)fileWithUID:(CPString)aUID
-{
-    var index = [queue indexOfObjectPassingTest:function(file)
-                    {
-                        return [file UID] === aUID;
-                    }];
-
-    return index >= 0 ? queue[index] : nil;
-}
-
-- (id)fileUpload:(id)firstObject, ...
-{
-    // The arguments array contains self and _cmd, so the first object is at position 2.
-    var args = Array.prototype.slice.apply(arguments, [2]),
-        widget = jQuery("#" + widgetId);
-
-    if (args[0] !== nil)
-        return widget.fileupload.apply(widget, args);
-    else
-        return widget.fileupload();
-}
-
-- (JSObject)makeOptions
-{
-    fileUploadOptions["dataType"] = "json";
-    fileUploadOptions["url"] = URL;
-    fileUploadOptions["sequentialUploads"] = sequential;
-    fileUploadOptions["maxChunkSize"] = maxChunkSize;
-    fileUploadOptions["limitConcurrentUploads"] = maxConcurrentUploads;
-    fileUploadOptions["progressInterval"] = progressInterval;
-    fileUploadOptions["dropZone"] = jQueryDropTarget;
-
-    [self setCallbacks:fileUploadOptions];
-
-    return fileUploadOptions;
 }
 
 - (void)updateProgressWithUploadedBytes:(CPNumber)uploadedBytes total:(CPNumber)total percentComplete:(CPNumber)percentComplete bitrate:(CPNumber)bitrate
@@ -1179,7 +979,7 @@ var CupDefaultProgressInterval = 100;
     if (filenameFilterRegex && !filenameFilterRegex.test(file.name))
         flags |= CupFilteredName;
 
-    if (file.size != null && maxFileSize && file.size > maxFileSize)
+    if (file.hasOwnProperty("size") && maxFileSize && file.size > maxFileSize)
         flags |= CupFilteredSize;
 
     return flags;
@@ -1204,10 +1004,10 @@ var CupDefaultProgressInterval = 100;
     }
 
     [[CPAlert alertWithMessageText:error
-                     defaultButton:@"OK"
-                   alternateButton:nil
-                       otherButton:nil
-         informativeTextWithFormat:@""] runModal];
+                     defaultButton:@"OK"
+                   alternateButton:nil
+                       otherButton:nil
+         informativeTextWithFormat:@""] runModal];
 }
 
 - (int)totalSizeOfQueue
@@ -1229,29 +1029,7 @@ var CupDefaultProgressInterval = 100;
 /*!
     @class CupFile
 
-    A wrapper for the File API (https://developer.mozilla.org/en/DOM/file)
-    that allows the values to be used in bindings. Note that if the browser
-    does not support the File API, the size, type, and percentComplete
-    properties will be zero/empty.
-
-    These objects are stored in the Cup queue controller,
-    thus you can bind through the queue controller's arrangedObjects or
-    selection to properties of this class.
-
-    This class exposes the following KVO compliant read-only properties:
-
-    name            The filename of the file
-    size            The file's size in bytes
-    type            The file's mime type
-    status          One of the CupStatus constants above
-    uploading       A BOOL set to YES during uploading
-    uploadedBytes   The number of bytes uploaded so far for this file
-    bitrate         The upload bitrate for this file
-    percentComplete An integer from 0-100 representing the percentage of the file
-                    that has been uploaded so far
-    indeterminate   A BOOL that indicates whether the total size of the file
-                    is known. This affects what is reported in the progress callbacks.
-    data            The Javascript data object used by jQuery File Upload
+    A native XMLHttpRequest Level 2 implementation wrapper for the File API.
 */
 @implementation CupFile : CPObject
 {
@@ -1265,6 +1043,10 @@ var CupDefaultProgressInterval = 100;
     float           bitrate @accessors;
     BOOL            indeterminate @accessors(readonly);
     JSObject        data @accessors;
+
+    JSObject        nativeFile;
+    XMLHttpRequest  xhr;
+    double          startTime;
 }
 
 + (void)initialize
@@ -1284,15 +1066,11 @@ var CupDefaultProgressInterval = 100;
 
 /*!
     Designated initializer.
-
-    Init with a Javascript File object and jQuery File Upload data.
 */
 - (id)initWithCup:(Cup)aCup file:(JSObject)file data:(JSObject)someData
 {
     if (self = [super init])
     {
-        // Tag the JS File object with the CupFile UID so we can locate the CupFile
-        // object later from a File object passed by a jQuery File Upload callback.
         file.CPUID = [self UID];
         cup = aCup;
         name = file.name;
@@ -1300,8 +1078,9 @@ var CupDefaultProgressInterval = 100;
         uploading = NO;
         bitrate = 0.0;
         data = someData;
+        nativeFile = file;
 
-        if (file.size != null)
+        if (file.hasOwnProperty("size"))
         {
             size = file.size;
             type = file.type;
@@ -1328,39 +1107,243 @@ var CupDefaultProgressInterval = 100;
 }
 
 /*!
-    Submit this file for uploading. This will in turn trigger the relevant
-    methods in Cup and its delegate.
+    Submit this file for uploading.
 */
 - (void)submit
 {
-    [self setStatus:CupFileStatusUploading];
+    [self setStatus:CupFileStatusPending];
     [self setUploadedBytes:0];
 
-    data.submit();
+    if ([cup uploading] || [cup autoUpload])
+    {
+        [cup _processQueue];
+    }
 }
 
 /*!
     Notifies the file that it has actually started uploading.
-    Normally you would not need to call this method, it is called
-    by Cup when necessary.
 */
 - (void)start
 {
+    if (uploading)
+        return;
+
+    [self setStatus:CupFileStatusUploading];
     [self setUploading:YES];
+    startTime = +new Date();
+
+    [self _upload];
 }
 
 /*!
-    Stops the upload for the file and notifies the delegate. Use this method
-    to stop a single file within the queue without stopping the entire queue.
+    Stops the upload for the file.
 */
 - (void)stop
 {
+    if (xhr)
+    {
+        [xhr abort];
+        xhr = nil;
+    }
+
     [self setStatus:CupFileStatusPending];
     [self setUploading:NO];
 
-    data.abort();
-
     [cup uploadWasStoppedForFile:self];
+}
+
+- (void)_upload
+{
+    var maxChunkSize = [cup maxChunkSize];
+
+    if (maxChunkSize > 0 && size > maxChunkSize)
+    {
+        [self _uploadNextChunk:0];
+    }
+    else
+    {
+        [self _uploadFull];
+    }
+}
+
+- (void)_uploadFull
+{
+    xhr = new XMLHttpRequest();
+    xhr.open("POST", [cup URL], true);
+
+    xhr.upload.addEventListener("progress", function(e) {
+        if (e.lengthComputable)
+        {
+            [self _onProgressWithLoaded:e.loaded total:e.total];
+        }
+    }, false);
+
+    xhr.addEventListener("load", function(e) {
+        if (xhr.status >= 200 && xhr.status < 300)
+        {
+            [self _onSuccess:xhr.responseText];
+        }
+        else
+        {
+            [self _onFailure];
+        }
+    }, false);
+
+    xhr.addEventListener("error", function(e) {
+        [self _onFailure];
+    }, false);
+
+    xhr.addEventListener("abort", function(e) {
+        [self _onAbort];
+    }, false);
+
+    var formData = new FormData();
+    formData.append("files[]", nativeFile, name);
+
+    var canSend = [cup willSendFile:self];
+    if (!canSend)
+    {
+        [self stop];
+        return;
+    }
+
+    xhr.send(formData);
+}
+
+- (void)_uploadNextChunk:(int)startByte
+{
+    var maxChunkSize = [cup maxChunkSize],
+        endByte = Math.min(startByte + maxChunkSize, size);
+
+    xhr = new XMLHttpRequest();
+    xhr.open("POST", [cup URL], true);
+
+    var contentRange = "bytes " + startByte + "-" + (endByte - 1) + "/" + size;
+    xhr.setRequestHeader("Content-Range", contentRange);
+
+    xhr.upload.addEventListener("progress", function(e) {
+        if (e.lengthComputable)
+        {
+            var totalLoaded = startByte + e.loaded;
+            [self _onProgressWithLoaded:totalLoaded total:size];
+        }
+    }, false);
+
+    xhr.addEventListener("load", function(e) {
+        if (xhr.status >= 200 && xhr.status < 300)
+        {
+            [cup chunkDidSucceedForFile:self];
+
+            if (endByte < size)
+            {
+                [self _uploadNextChunk:endByte];
+            }
+            else
+            {
+                [self _onSuccess:xhr.responseText];
+            }
+        }
+        else
+        {
+            [cup chunkDidFailForFile:self];
+            [self _onFailure];
+        }
+
+        [cup chunkDidCompleteForFile:self];
+    }, false);
+
+    xhr.addEventListener("error", function(e) {
+        [cup chunkDidFailForFile:self];
+        [self _onFailure];
+        [cup chunkDidCompleteForFile:self];
+    }, false);
+
+    xhr.addEventListener("abort", function(e) {
+        [cup chunkDidFailForFile:self];
+        [self _onAbort];
+        [cup chunkDidCompleteForFile:self];
+    }, false);
+
+    var chunkBlob = nativeFile.slice(startByte, endByte);
+    var formData = new FormData();
+    formData.append("files[]", chunkBlob, name);
+
+    var canSend = [cup chunkWillSendForFile:self];
+    if (!canSend)
+    {
+        [self stop];
+        return;
+    }
+
+    xhr.send(formData);
+}
+
+- (void)_onProgressWithLoaded:(int)loaded total:(int)total
+{
+    [self setUploadedBytes:loaded];
+
+    var currentTime = +new Date(),
+        timeElapsed = (currentTime - startTime) / 1000;
+
+    if (timeElapsed > 0)
+    {
+        var currentBitrate = (loaded * 8) / timeElapsed;
+        [self setBitrate:currentBitrate];
+    }
+
+    var progressData = {
+        uploadedBytes: loaded,
+        total: total,
+        bitrate: bitrate
+    };
+
+    var mockData = {
+        loaded: loaded,
+        total: total,
+        bitrate: bitrate,
+        files: [nativeFile]
+    };
+    [cup setCurrentData:mockData];
+
+    [cup uploadForFile:self didProgress:progressData];
+}
+
+- (void)_onSuccess:(CPString)responseText
+{
+    xhr = nil;
+    [self setStatus:CupFileStatusComplete];
+    [self setUploading:NO];
+
+    var mockData = {
+        loaded: size,
+        total: size,
+        bitrate: bitrate,
+        result: responseText,
+        files: [nativeFile]
+    };
+    [cup setCurrentData:mockData];
+
+    [cup uploadDidSucceedForFile:self];
+    [cup uploadDidCompleteForFile:self];
+}
+
+- (void)_onFailure
+{
+    xhr = nil;
+    [self setStatus:CupFileStatusPending];
+    [self setUploading:NO];
+
+    [cup uploadDidFailForFile:self];
+    [cup uploadDidCompleteForFile:self];
+}
+
+- (void)_onAbort
+{
+    xhr = nil;
+    [self setStatus:CupFileStatusPending];
+    [self setUploading:NO];
+
+    [cup uploadDidCompleteForFile:self];
 }
 
 - (CPString)description
@@ -1374,12 +1357,6 @@ var CupDefaultProgressInterval = 100;
 /*!
     This class is designed to replace the standard NSTableCellView used in a view-based table
     within Xcode. It provides an action method which can be used to stop a single file's upload.
-
-    Usage
-    1. Select the table cell view in which you want to place a stop button.
-    2. Go to the Identity Inspector and set the class to CupTableCellView.
-    3. Place a button in the cell view.
-    4. Connect the selector of the button to the `stopUpload:` method in its own cell view.
 */
 @implementation CupTableCellView : CPTableCellView
 
@@ -1389,19 +1366,3 @@ var CupDefaultProgressInterval = 100;
 }
 
 @end
-
-
-/*! @ignore */
-var cloneOptions = function(options)
-{
-    var clone = {};
-
-    for (var key in options)
-        if (options.hasOwnProperty(key))
-            if (typeof(options[key]) === "function")
-                continue;
-            else
-                clone[key] = options[key];
-
-    return clone;
-};
