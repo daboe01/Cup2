@@ -17,6 +17,7 @@
 @import <AppKit/CPPlatform.j>
 @import <AppKit/CPPlatformWindow.j>
 @import <AppKit/CPTableView.j>
+@import <AppKit/CPCursor.j>
 
 CupFileStatusPending   = 0;
 CupFileStatusUploading = 1;
@@ -56,7 +57,9 @@ var baseWidgetId = @"Cup_input",
     delegateStartQueue = 1 << 21,
     delegateClearQueue = 1 << 22,
     delegateStopQueue = 1 << 23,
-    delegateSucceedWithResponse = 1 << 24;
+    delegateSucceedWithResponse = 1 << 24,
+    delegateDragEnter = 1 << 25,
+    delegateDragLeave = 1 << 26;
 
 var CupDefaultProgressInterval = 100;
 
@@ -101,7 +104,9 @@ var CupDefaultProgressInterval = 100;
     @outlet CPArrayController queueController @accessors(readonly);
 
     // Native event listeners
+    JSObject            _onDragEnterHandler;
     JSObject            _onDragOverHandler;
+    JSObject            _onDragLeaveHandler;
     JSObject            _onDropHandler;
     JSObject            _onPasteHandler;
 }
@@ -201,7 +206,9 @@ var CupDefaultProgressInterval = 100;
 
     if (oldElement)
     {
+        oldElement.removeEventListener("dragenter", _onDragEnterHandler);
         oldElement.removeEventListener("dragover", _onDragOverHandler);
+        oldElement.removeEventListener("dragleave", _onDragLeaveHandler);
         oldElement.removeEventListener("drop", _onDropHandler);
         oldElement.removeEventListener("paste", _onPasteHandler);
     }
@@ -215,7 +222,9 @@ var CupDefaultProgressInterval = 100;
 
     if (element)
     {
+        element.addEventListener("dragenter", _onDragEnterHandler);
         element.addEventListener("dragover", _onDragOverHandler);
+        element.addEventListener("dragleave", _onDragLeaveHandler);
         element.addEventListener("drop", _onDropHandler);
         element.addEventListener("paste", _onPasteHandler);
     }
@@ -309,6 +318,12 @@ var CupDefaultProgressInterval = 100;
 
     if ([delegate respondsToSelector:@selector(cup:uploadDidSucceedForFile:response:)])
         delegateImplementsFlags |= delegateSucceedWithResponse;
+
+    if ([delegate respondsToSelector:@selector(cupDidDragEnter:)])
+        delegateImplementsFlags |= delegateDragEnter;
+
+    if ([delegate respondsToSelector:@selector(cupDidDragLeave:)])
+        delegateImplementsFlags |= delegateDragLeave;
 }
 
 /*!
@@ -806,17 +821,68 @@ var CupDefaultProgressInterval = 100;
 
 - (void)_init
 {
-    var self_ = self;
+    var self_ = self,
+        dragCounter = 0;
+
+    _onDragEnterHandler = function(e)
+    {
+        e.preventDefault();
+        dragCounter++;
+
+        if (dragCounter === 1)
+        {
+            var element = (dropTarget === [CPPlatformWindow primaryPlatformWindow]) ? document.body : dropTarget._DOMElement;
+            if (element)
+            {
+                var children = element.getElementsByTagName('*');
+                for (var i = 0; i < children.length; i++) {
+                    children[i].style.pointerEvents = "none";
+                }
+            }
+
+            // Set copy pointer indicator
+            [[CPCursor dragCopyCursor] set];
+
+            if (delegateImplementsFlags & delegateDragEnter)
+                [delegate cupDidDragEnter:self_];
+        }
+    };
 
     _onDragOverHandler = function(e)
     {
         e.preventDefault();
+        e.dataTransfer.dropEffect = "copy";
         [self_ filesWereDraggedOverWithEvent:e];
+    };
+
+    _onDragLeaveHandler = function(e)
+    {
+        e.preventDefault();
+        dragCounter--;
+
+        if (dragCounter <= 0)
+        {
+            dragCounter = 0;
+            
+            // Revert pointer feedback
+            [[CPCursor arrowCursor] set];
+
+            if (delegateImplementsFlags & delegateDragLeave)
+                [delegate cupDidDragLeave:self_];
+        }
     };
 
     _onDropHandler = function(e)
     {
         e.preventDefault();
+        dragCounter = 0;
+
+        // Revert pointer feedback
+        [[CPCursor arrowCursor] set];
+
+        if (delegateImplementsFlags & delegateDragLeave)
+            [delegate cupDidDragLeave:self_];
+
         var files = e.dataTransfer && e.dataTransfer.files;
         if (files && files.length > 0)
         {

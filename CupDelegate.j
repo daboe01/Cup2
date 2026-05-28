@@ -223,4 +223,18 @@
 {
 }
 
+/*!
+    Called once when dragging enter the Cup drop target.
+*/
+- (void)cupDidDragEnter:(Cup)cup
+{
+}
+
+/*!
+    Called once when dragging leaves the Cup drop target.
+*/
+- (void)cupDidDragLeave:(Cup)cup
+{
+}
+
 @end
