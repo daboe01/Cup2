@@ -2,9 +2,10 @@
 
 Cup2 is a file upload management framework for the [Cappuccino Web Framework](http://www.cappuccino-project.org). 
 
-It was forked from the Cup framework (aparajita/Cup) with two primary goals:
+It was forked from the Cup framework (aparajita/Cup) with three primary goals:
 1. **Eliminate the jQuery dependency:** Cup2 removes the requirement for jQuery and the jQuery File Upload library, instead utilizing modern native browser APIs (`XMLHttpRequest` Level 2, `FormData`, and HTML5 Drag-and-Drop).
 2. **Expose server responses:** It introduces the delegate method `- (void)cup:(Cup)cup uploadDidSucceedForFile:(CupFile)file response:(id)response`, allowing developers to retrieve and process server response data directly upon a successful upload.
+3. **Delegate methods for Drag Feedback:** It introduces a built-in event isolation mechanism (combining recursive child element pointer-event management with a boundary transaction `dragCounter`) to completely eliminate event flickering when dragging files over complex `CPView` hierarchies with nested subviews. Additionally, it controls visual cursor feedback.
 
 To maintain source compatibility and ease the migration process, class names, file names, and import structures have not been renamed and continue to use the original `Cup` prefix.
 
@@ -15,9 +16,10 @@ To maintain source compatibility and ease the migration process, class names, fi
 - **No External Dependencies:** Written in native Objective-J, utilizing standard Web APIs rather than third-party libraries.
 - **Flexible Queue Management:** Supports sequential or concurrent uploads (with configurable limits on active concurrent connections).
 - **Chunked Uploads:** Supports slicing large files into smaller chunks using the `Content-Range` header.
-- **Drag-and-Drop & Paste:** Configure any `CPView` (or the main browser window) as a drop zone or clipboard paste listener.
+- **Drag-and-Drop feedback:** Introduces delegate methods to perform custom feedback actions.
+- **Deep Drop:** Configure any `CPView` (or the main browser window) as a drop zone.
 - **KVO & Bindings Support:** Integration with table views (`CPTableView`) or progress bars using a standard `CPArrayController`.
-- **Comprehensive Delegate Protocol:** Detailed callback support for validation filters, file size limits, progress tracking, and state changes—including access to the raw server response.
+- **Comprehensive Delegate Protocol:** Detailed callback support for validation filters, file size limits, progress tracking, and state changes—including access to the raw server response and clean boundary entry/exit hooks.
 
 ---
 
@@ -104,7 +106,7 @@ A helper value transformer designed to convert raw byte sizes into human-readabl
 
 Implement these methods in your controller to monitor and react to events in the upload lifecycle. 
 
-Note the added delegate method that provides access to the server response object:
+Note the delegate methods that provide access to the server response object and the flicker-free drop target boundary events:
 
 ```objective-j
 // Determine if a file should be accepted into the queue before it is added
@@ -117,6 +119,19 @@ Note the added delegate method that provides access to the server response objec
 - (void)cup:(Cup)cup uploadForFile:(CupFile)file didProgress:(JSObject)progress
 {
     // progress contains: uploadedBytes, total, bitrate
+}
+
+// NEW IN CUP2: Safely handles dragging entering the drop target boundaries 
+// without triggering rapid events when hovering over nested child views
+- (void)cupDidDragEnter:(Cup)cup
+{
+    // Apply styling or show visual drop-zone states here
+}
+
+// NEW IN CUP2: Safely handles dragging completely exiting the drop target boundaries
+- (void)cupDidDragLeave:(Cup)cup
+{
+    // Revert visual drag highlights safely here
 }
 
 // NEW IN CUP2: Receive notification when an upload succeeds, including the server response
@@ -135,6 +150,5 @@ Note the added delegate method that provides access to the server response objec
 {
     CPLog.info(@"Upload succeeded for: " + [file name]);
 }
-```
 
 For a complete list of available delegate methods, please refer to `CupDelegate.j`.
